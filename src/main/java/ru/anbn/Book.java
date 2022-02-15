@@ -6,6 +6,7 @@ public class Book {
 
     void doReadBook() {
         System.out.println("The book is read!" + author);
+        System.out.println("Text");
     }
 
 }
