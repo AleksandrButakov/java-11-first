@@ -5,6 +5,6 @@ public class IPAddress {
     String sCIDR;
     String sNetwork;
     String sGateway;
-    String shosts;
+    String hosts;
 
 }

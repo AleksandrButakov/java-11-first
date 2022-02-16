@@ -1,22 +1,31 @@
 package ru.anbn;
 
-import javax.annotation.processing.SupportedSourceVersion;
 import java.util.InputMismatchException;
 import java.util.Scanner;
-import java.util.zip.CheckedInputStream;
 
+import static java.lang.Long.toBinaryString;
 
 public class FirstClass {
 
-    static String sIPAddress;              // IP address
-    static int iCIDR;                      // маска в формате CIDR
-    static String sCIDR;                   // маска в формате CIDR
-    static String sTempVar;
-    static String sByteVar = ""; // временная переменная для выполнения промежуточных расчетов
-    static int iTempVar;                   // временная переменная для выполнения промежуточных расчетов
-    static int b3, b2, b1, b0;             // переменные для хранения значений байт
-    static String sb3 = "", sb2 = "", sb1 = "", sb0 = "";      // переменные для хранения значений байт
-    static int sLength;                    // длина IP адреса
+    static String sIPAddress;   // IP address
+    static String sb3 = "", sb2 = "", sb1 = "", sb0 = "";   // переменные для хранения значений байт IP адреса
+    static String sIPAddressSubnet;   // IP адрес подсети
+    static String sIPBinByte;   // бинарный вид последнего байта IP адреса в формате String
+    static String sIPBinByteSubnet = "";   // бинарный вид последнего байта IP c учетом маски подсети в формате String
+    static int sLength;   // длина IP адреса
+
+    static String sCIDR;   // маска в формате CIDR
+    static int iCIDR;   // маска в формате CIDR
+    static String sMaskBinByte;   // бинарный вид байта маски в формате String
+
+    static String sIPMask; // IP mask
+
+    static String sTempVar;      // временная переменная для выполнения промежуточных расчетов
+    static String sByteVar = "";
+    static int iTempVar;
+
+    static String hostsMin, hostsMax;   // начальный и конечные IP адреса в подсети
+    static int numberHosts;   // количество хостов в подсети
 
     public static void main(String[] args) {
         // программа расчета IP адреса подсети, количества хостов в ней, адреса gateway
@@ -47,31 +56,105 @@ public class FirstClass {
         // проверим что длина IP адреса лежит в диапазоне 7...15 символов
         sLength = sIPAddress.length();
         if (sLength < 7 || sLength > 15) {
-        incorrectData("02");
+            incorrectData("02");
         }
 
         // проверим что введенный символ является числом, точкой или запятой
         for (int i = 0; i < sLength; i++) {
             sTempVar = sIPAddress.substring(i, i + 1);
-            System.out.println("sTempVar = " + sTempVar);
             checkingCorrectnessSymbol(sTempVar, i);
         }
 
         // проверим что значение CIDR в допустимом диапазоне
-
-        if (iCIDR >= 24 && iCIDR <= 32) {
+        if (iCIDR >= 24 && iCIDR <= 30) {
             // correct data
         } else {
             // incorrect data
             incorrectData("03");
         }
 
-        System.out.println(sb3);
-        System.out.println(sb2);
-        System.out.println(sb1);
-        System.out.println(sb0);
-    }
+        // присвоим значеня sBinByte и sIPMask в соответствии с выбранной маской CIDR
+        switch (iCIDR) {
+            case (24):
+                sMaskBinByte = "00000000";
+                sIPMask = "255.255.255.0";
+                numberHosts = 254;
+                break;
+            case (25):
+                sMaskBinByte = "10000000";
+                sIPMask = "255.255.255.128";
+                numberHosts = 126;
+                break;
+            case (26):
+                sMaskBinByte = "11000000";
+                sIPMask = "255.255.255.192";
+                numberHosts = 62;
+                break;
+            case (27):
+                sMaskBinByte = "11100000";
+                sIPMask = "255.255.255.224";
+                numberHosts = 30;
+                break;
+            case (28):
+                sMaskBinByte = "11110000";
+                sIPMask = "255.255.255.240";
+                numberHosts = 14;
+                break;
+            case (29):
+                sMaskBinByte = "11111000";
+                sIPMask = "255.255.255.248";
+                numberHosts = 6;
+                break;
+            case (30):
+                sMaskBinByte = "11111100";
+                sIPMask = "255.255.255.252";
+                numberHosts = 2;
+                break;
+        }
 
+        System.out.println();
+        System.out.println("Subnet calculation:");
+        System.out.println("Subnet mask byte: " + sMaskBinByte);
+        System.out.println("Subnet mask: " + sIPMask);
+
+        // переведем младший байт IP адреса в двоичный вид типа String
+        sIPBinByte = toBinaryString(Integer.parseInt(sb0));
+        iTempVar = sIPBinByte.length();
+        if (iTempVar < 8) {
+            for (int i = 0; i <= 7 - iTempVar; i++) {
+                sIPBinByte = "0" + sIPBinByte;
+            }
+        }
+        System.out.println("IP address byte: " + sIPBinByte);
+
+        // расчитаем IP адрес с учетом маски подсети, данные запишем в переменную sIPBinByteSubnet
+        for (int i = 0; i <= 7; i++) {
+            if (sMaskBinByte.substring(i, i + 1).equals("1")) {
+                sIPBinByteSubnet = sIPBinByteSubnet + sIPBinByte.substring(i, i + 1);
+            } else {
+                sIPBinByteSubnet = sIPBinByteSubnet + "0";
+            }
+        }
+        System.out.println("The lowest byte of the IP address, taking into account the mask: " + sIPBinByteSubnet);
+
+        // найдем IP адрес подсети
+        sIPAddressSubnet = sb3 + "." + sb2 + "." + sb1 + "." + (Integer.parseInt(sIPBinByteSubnet, 2));
+        System.out.println("Subnet IP address: " + sIPAddressSubnet);
+
+        // Найдем начальный адрес в подсети, адрес gateway
+        hostsMin = sb3 + "." + sb2 + "." + sb1 + "." + (Integer.parseInt(sIPBinByteSubnet, 2) + 1);
+        hostsMax = sb3 + "." + sb2 + "." + sb1 + "." + (Integer.parseInt(sIPBinByteSubnet, 2) + numberHosts);
+
+        System.out.println("Minimum address in the subnet: " + hostsMin);
+        System.out.println("Maximum address in the subnet: " + hostsMax);
+        System.out.println("Number of hosts in the subnet: " + numberHosts);
+
+        // присвоим значения экземпляру класса ipAddress (в данном функционела дальнейшего их использования не происходит)
+        ipAddress.sNetwork = sIPMask;
+        ipAddress.sGateway = hostsMax;
+        ipAddress.hosts = String.valueOf(numberHosts);
+
+    }
 
     // проверим что введенный символ является числом, точкой или запятой
     static void checkingCorrectnessSymbol(String sTempVar, int i) {
@@ -109,110 +192,10 @@ public class FirstClass {
         } else {
             sByteVar = sByteVar + sTempVar;
         }
-
     }
 
-    static void incorrectData (String step) {
+    static void incorrectData(String step) {
         System.out.println("Incorrectly entered data :-(  Step = " + step);
         System.exit(0);
     }
-
 }
-
-
-        /*
-        // boolean, int
-        boolean aBoolaen = true;
-        int counter = 1;    // counter for the cycle
-        int decimalNumber;  // decimal number to convert to other number systems
-
-        while (aBoolaen) {
-            System.out.println("The while loop is executed! Step " + counter);
-            counter++;
-            if (counter == 5) aBoolaen = false;
-        }
-
-        // entering a decimal number 0 ... 255 and converting it to binary and hexadecimal
-        Scanner in = new Scanner(System.in);
-        try {
-            // the number belongs to the range 0 ... 255
-            decimalNumber=in.nextInt();
-            if (decimalNumber<0 || decimalNumber>255) {
-                System.out.println("Incorrect data entered :-(");
-                return;
-            }
-        } catch (InputMismatchException e) {
-            System.out.println("Invalid data :-(");
-        }
-
-
-
-        // int
-
-        //
-
-        //
-        //
-
-    /*
-    // поле класса или class feet
-    int var = 1_000_000;
-
-    byte aByte;     // 8 bit    -128 ... 127
-    short aShort;   // 16 bit   -32768 ... 32767
-    int aInt;       // 32 bit   -2 ^ 31 ... (2 ^ 31) - 1
-    long aLong;     // 64 bit   -2 ^ 63 ... (2 ^ 63) - 1
-
-    float aFloat = 4.6f;   // 32 bit
-
-    // саый используемый если просто хранить, но не для арифметики
-    double aDouble = 456.54; // 64 bit
-
-    char aChar;
-    boolean aBoolear;
-    // литерал - представление типа данных int i = 10, 10 это литерал
-    String aString = "QAGuru";
-
-
-    public static void main(String[] args) {
-        // + -- сложение
-        // - -- вычитание
-        // * -- умножение
-        // / -- целочисленное деление 5 / 2 = 2
-        // % -- остаток от деления
-        // инкремент ++
-        // декремент --
-
-        System.out.println(5 + 10);
-        // >
-        // <
-        // >=
-        // <=
-        // ==
-        // !=
-
-        System.out.println(2 < 3);
-
-        // =
-        // +=
-        // -=
-
-        int a=10;
-        int b= 10;
-        a=a+b;
-        a +=b;  // то же самое
-
-        System.out.println(a++); // вывели и потом инкремент
-        System.out.println(++a); // результат отображен до вывода значения
-
-        // && и, логическое умножение
-        // || илиб логическое сложение
-        // ! не
-
-        boolean result1 = (3>2) && (3>1);   //
-        boolean result2 = (3>2) & (3>1);    // вычисляем все части
-
-        Book murzilka = new Book();
-        murzilka.doReadBook();
-    }
-     */
