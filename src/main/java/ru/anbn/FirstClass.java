@@ -6,6 +6,10 @@ import java.util.Scanner;
 import static java.lang.Long.toBinaryString;
 
 public class FirstClass {
+    /* Программа расчета подсети по введенному IP адресу и маски в формате CIDR. В выходных данных
+     * присутствует маска, адрес подсети с учетом маски, минимальный и максимальный адреса в подсети
+     * и количество возможных хостов в диапазоне
+     */
 
     static String sIPAddress;   // IP address
     static String sb3 = "", sb2 = "", sb1 = "", sb0 = "";   // переменные для хранения значений байт IP адреса
