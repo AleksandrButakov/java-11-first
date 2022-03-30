@@ -59,8 +59,98 @@ public class FirstClass {
         boolean result1 = (3>2) && (3>1);   //
         boolean result2 = (3>2) & (3>1);    // вычисляем все части
 
-        Book murzilka = new Book();
-        murzilka.doReadBook();
+        Book war = new Book("Лев Толстой", "Анна Каренина");
+        Book stupid = new Book("Федор Достоевский", "Хдиот");
+        Book master = new Book("Михаил Булгаков", "Мастер и Маргарита");
+        Book remark = new Book("Эрих Мария Ремарк", "Ночь в Лиссабоне");
+        // выводим данные на экран
+        war.doReadBook();
+        stupid.doReadBook();
+        master.doReadBook();
+        remark.doReadBook();
+
+        /* кладем элементы в массив
+           Book[] library = new Book[4];
+           library[0] = war;
+           library[1] = stupid;
+           library[2] = master;
+           library[3] = remark;
+         */
+
+        // или можно так положить
+        Book[] library = new Book[] {war, stupid, master, remark};
+
+        System.out.println("Array length: " + library.length);
+        System.out.println("Equal objects? " + (war.equals(stupid)));
+
+        System.out.println();
+        System.out.println("Cycles while");
+        // cycles
+        int index = 0;
+        while (index < library.length) {
+            System.out.println("Book " + library[index].doReadBook());
+            index++;
+        }
+
+        System.out.println();
+        System.out.println("Cycles do while");
+        index = 0;
+        do {
+            System.out.println("Book " + library[index].doReadBook());
+            index++;
+        } while (index < library.length);
+
+        System.out.println();
+        System.out.println("Cycles for");
+        for (int i = 0; i < library.length; i++) {
+            System.out.println("Book " + library[i].doReadBook());
+        }
+
+        System.out.println();
+        System.out.println("for the reverse cycle");
+        for (int i = (library.length - 1); i >= 0; i--) {
+            System.out.println("Book " + library[i].doReadBook());
+        }
+
+        System.out.println();
+        System.out.println("for each cycle");
+        /* for (что : откуда) Справа источник данных, массив или коллекция, слева это элемент который мы будем
+           получать из этой коллекции или массива на каждой итерации и работать с ним в теле цикла.
+           Этот цикл будет работать до конца массива
+         */
+        for (Book book: library) {
+            // если книга не содержит Достоевского, то её выводить не будем
+            if (!book.author.contains("Достоевский")) {
+                System.out.println("Book " + book.doReadBook());
+            }
+        }
+
+        // тот же цикл, что и выше, только с использованием continue;
+        for (Book book: library) {
+            // если книга содержит Достоевского, на continue завершаем текущую итерацию и переходим к следующей
+            if (book.author.contains("Достоевский"))
+                continue;   // ключевое слово завершает итерацию цикла и переходит к следующей, если она есть
+                System.out.println("Book " + book.doReadBook());
+        }
+
+        // заведем переменную
+        Book desiredBook = null;
+        for (Book book: library) {
+            /* ищем в авторах достоевского и если находим то присваиваем переменной desiredBook значение book
+               и прерываем выполнение цикла командой break. Затем выводим найденную книгу с Достоевским
+             */
+            if (book.author.contains("Достоевский")) {
+                desiredBook = book;
+                /* break; завершает цикл. Можем еще использовать return; но return - это конструкция по выходу
+                из метода, т.е. работа метода будет прервана. Можно еще System.exit(0) и завершить выполнение
+                всей программы. В общем break and continue это два основных способа
+                 */
+                break;
+            }
+        }
+        System.out.println("Book " + desiredBook.doReadBook());
+
+
     }
 
 }
