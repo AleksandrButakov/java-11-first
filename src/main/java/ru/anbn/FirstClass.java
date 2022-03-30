@@ -61,7 +61,6 @@ public class FirstClass {
 
         Book murzilka = new Book();
         murzilka.doReadBook();
-
     }
 
 }
